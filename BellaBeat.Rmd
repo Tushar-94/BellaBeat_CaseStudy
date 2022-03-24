@@ -1,0 +1,389 @@
+---
+title: 'BellaBeat CaseStudy : Google Data Analytics'
+author: "Sunkra Tushar Rao"
+date: '2022-03-21'
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Bellabeat - How Can a Wellness Technology Company Play It Smart?
+
+Bellabeat is a high-tech company that manufactures health-focused smart products including Bellabeat app, Leaf, Time and Spring. It also offers a subscription-based membership program for users giving them access to personalised guidance on having a healthy lifestyle. Bellabeat has positioned itself as a tech-driven wellness company for women.
+
+Bellabeat has been investing extensively on digital marketing including Google Search and being active on social media platforms. The co-founder Sršen knows that an analysis of Bellabeat’s available consumer data would reveal more opportunities for growth.
+
+### About the Company
+Urška Sršen and Sando Mur founded Bellabeat, a high-tech company that manufactures health-focused smart products. Sršen used her background as an artist to develop beautifully designed technology that informs and inspires women around the world. Collecting data on activity, sleep, stress, and reproductive health has allowed Bellabeat to empower women with knowledge about their own health and habits. Since it was founded in 2013, Bellabeat has grown rapidly and quickly positioned itself as a tech-driven wellness company for women.
+
+By 2016, Bellabeat had opened offices around the world and launched multiple products. Bellabeat products became available through a growing number of online retailers in addition to their own e-commerce channel on their website. The company has invested in traditional advertising media, such as radio, out-of-home billboards, print, and television, but focuses on digital marketing extensively. Bellabeat invests year-round in Google Search, maintaining active Facebook and Instagram pages, and consistently engages consumers on Twitter. Additionally, Bellabeat runs video ads on Youtube and display ads on the Google Display Network to support campaigns around key marketing dates.
+
+Sršen knows that an analysis of Bellabeat’s available consumer data would reveal more opportunities for growth. She has asked the marketing analytics team to focus on a Bellabeat product and analyze smart device usage data in order to gain insight into how people are already using their smart devices. Then, using this information, she would like high-level recommendations for how these trends can inform Bellabeat marketing strategy.
+
+
+## Step 1 : ASK
+Analyze smart device usage data in order to gain insight into how consumers use non-Bellabeat smart devices. The founder then wants us to select one Bellabeat product to apply these insights to in our presentation. These questions will guide our analysis:
+
+### Guiding Questions
+1. What are some trends in smart device usage?
+2. How could these trends apply to Bellabeat customers?
+3. How could these trends help influence Bellabeat marketing strategy?
+
+### How can I procced with my analysis so that i can have the following deliverables?
+1. A clear summary of the business task
+2. A description of all data sources used
+3. Documentation of any cleaning or manipulation of data
+4. A summary of your analysis
+5. Supporting visualizations and key findings
+6. Your top high-level content recommendations based on your analysis
+
+## Step 2 : PREPARE
+Sršen encourages us to use public data that explores smart device users’ daily habits. She points us to a specific data set: 
+**FitBit Fitness Tracker Data (CC0: Public Domain, dataset made available through Mobius)**: This Kaggle data setcontains personal fitness tracker from thirty fitbit users. Thirty eligible Fitbit users consented to the submission of personal tracker data, including minute-level output for physical activity, heart rate, and sleep monitoring. It includes information about daily activity, steps, and heart rate that can be used to explore users’ habits.
+Sršen tells you that this data set might have some limitations, and encourages you to consider adding another data to help address those limitations as you begin to work more with this data.
+
+Now, preparing our data for analysis using the following Case Study Roadmap as a guide:
+
+### Guiding Questions
+1. **Where is your data stored?**
+ <br>
+Data is publicly available on Kaggle: FitBit Fitness Tracker Data.
+2. **How is the data organized? Is it in long or wide format?**
+ <br>
+The data has a wide format since the values repeat in the first column. Data is stored in 18 csv files.
+3. **How are you addressing licensing, privacy, security, and accessibility?**
+ <br>
+This dataset is under CC0: Public Domain license meaning the creator has waive his right to the work under the copyright law.
+4. **How did you verify the data’s integrity?**
+  <br>
+As data is collected in a survey, we are unable to ascertain its integrity or accuracy.
+5. **How does it help you answer your question?**
+<br>
+This data explores smart device users’ daily habits. It includes information about daily activity, steps, sleep habits and heart rate, that can be used to explore users’ habits and find some trends.
+6. **Are there any problems with the data?**
+<br>
+*Only 30 user data is available. The central limit theorem general rule of n≥30 applies and we can      use the t test for statstic reference. However, a larger sample size is preferred for the analysis.
+<br>
+*Upon further investigation with n_distinct() to check for unique user Id, the set has 33 user data     from daily activity, 24 from sleep and only 8 from weight. There are 3 extra users and some users       did not record their data for tracking daily activity and sleep.
+<br>
+*For the 8 user data for weight, 5 users manually entered their weight and 3 recorded via a connected   wifi device (eg: wifi scale).
+<br>
+*Most data is recorded from Tuesday to Thursday, which may not be comprehensive enough to form an       accurate analysis.
+7. **Are there issues with bias or credibility in this data? Does your data ROCCC?**
+<br>
+**Reliability : LOW** - Dataset was collected from 30 individuals whose gender is unknown.
+<br>
+**Originality : LOW** - Third party data collect using Amazon Mechanical Turk.
+<br>
+**Comprehensive : MEDIUM ** - Dataset contains multiple fields on daily activity intensity, calories used, daily steps taken, daily sleep time and weight record.
+<br>
+**Current : MEDIUM ** - Data is 5 years old but the habit of how people live does not change over a few years
+<br>
+**Cited : HIGH** - Data collector and source is well documented
+
+## Step 3 : PROCESS
+
+### Uploading the files
+ 
+```{r files}
+setwd("/Users/tusharrao/Documents/CaseStudy_BellaBeat/Fitabase_Data_4.12.16-5.12.16")
+daily_activity <- read.csv("dailyActivity_merged.csv")
+weight_loss <- read.csv("weightLogInfo_merged.csv")
+daily_intensity <- read.csv("dailyIntensities_merged.csv")
+daily_calorie <- read.csv("dailyCalories_merged.csv")
+daily_steps <- read.csv("dailySteps_merged.csv")
+daily_sleep <- read.csv("sleepDay_merged.csv")
+
+```
+There are 18 files in total, but i felt that these 6 are sufficient for our analysis. Because the other 12 are the measuring different quantities in minutes and hours which may not be useful to get the overall findings of the analysis.
+
+### Installing and Loading the libraries
+```{r packages}
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(lubridate)
+library(rmarkdown)
+library(sqldf)
+library(ggpubr)
+require(gridExtra)
+```
+
+### Head() function
+To ensure the data frames were imported correctly, the head() function is used. 
+```{r head}
+head(daily_activity)
+```
+
+
+### Checking for NA
+```{r NA}
+sum(is.na(daily_activity)) 
+sum(is.na(weight_loss)) # 65 NA available
+sum(is.na(daily_intensity))
+sum(is.na(daily_calorie))
+sum(is.na(daily_steps))
+sum(is.na(daily_sleep))
+```
+
+### Checking for Unique values
+```{r unique}
+unique(daily_activity$Id) # 33 unique users also n_distinct(daily_activity$Id)
+unique(weight_loss$Id)  # 8 unique users
+unique(daily_intensity$Id) # 33 unique users
+unique(daily_calorie$Id) # 33 unique users
+unique(daily_steps$Id) # 33 unique users
+unique(daily_sleep$Id) # 24 unique users
+```
+
+**The result shows the dataset is inconsistent as we expect 30 unique Id on all tables. The sleepDay_merged table and the weigthLogInfo_merged table have the highest inconsistencies with 6 and 22 input missing. This would affect the result of the analysis.**
+
+### Checking if all the users are in daily activity from other table.
+```{r common}
+daily_activity_2 <- daily_activity %>% 
+  select(Id, ActivityDate, Calories)
+sql_check_calorie <- sqldf('Select * from daily_activity_2 Intersect Select * from daily_calorie')
+nrow(daily_activity)
+nrow(sql_check_calorie)
+
+daily_activity_3 <- daily_activity %>% 
+  select(Id, ActivityDate, TotalSteps)
+sql_check_steps <- sqldf('Select * from daily_activity_3 intersect select * from daily_steps')
+nrow(daily_activity)
+nrow(sql_check_steps)
+```
+Looks like we can only use the daily activity table from now on instead of calories and TotalSteps table since the daily activity already covers the information from Calories and TotalSteps table.
+
+### Checking average Steps and Calories burnt
+```{r average}
+daily_activity %>% 
+  select(TotalSteps, TotalDistance, Calories, VeryActiveDistance, ModeratelyActiveDistance, LightActiveDistance, SedentaryMinutes) %>% 
+  summary() 
+```
+**We can see that the average steps taken by the given users are 7638 and the average calorie burnt is 2304**
+
+### Renaming columns
+Inorder to combine daily activity and sleep table we need to change the column name so that there are two column with same name so that its easy to merge.
+```{r rename}
+daily_activity <- daily_activity %>% 
+  rename(Date = ActivityDate) %>% 
+  mutate(Date = as_date(Date, format = "%m/%d/%Y"))
+
+daily_sleep <- daily_sleep %>% 
+  rename(Date = SleepDay) %>% 
+  mutate(Date = as_date(Date, format = "%m/%d/%Y %I:%M:%S %p" , tz = Sys.timezone()))
+
+```
+### Merging the tables
+**Merging only common Id's.**
+```{r merge}
+daily_data <- merge(daily_activity, daily_sleep, by = c("Id", "Date"))
+glimpse(daily_data)
+n_distinct(daily_data$Id)
+```
+
+**Merging the two tables even if some Id's are missing in one of the table.**
+
+```{r merge2}
+combined_data <- merge(daily_activity, daily_sleep, by = c("Id", "Date"), all = TRUE)
+head(combined_data)
+n_distinct(combined_data$Id)
+  
+```
+
+### Guiding Question?
+
+1. **What tools are you choosing and why? **
+<br>
+I am using R for data cleaning, transformation and visualization. R provides an accessible language to organize, modify, clean data frames and create insightful data visualizations.
+<br>
+2. **Have you ensured your data’s integrity? **
+<br>
+Data was collected in a survey, so I am unable to ascertain its integrity or accuracy.
+<br>
+3. **What steps have you taken to ensure that your data is clean?**
+<br>
+I removed duplicates, NA´s, cleaned, formated and converted date formats.
+<br>
+4. **How can you verify that your data is clean and ready to analyze?**
+<br>
+I checked all cleaning operations above and assured accuracy.
+<br>
+5. **Have you documented your cleaning process so you can review and share those results?**
+<br>
+Yes, I used R Markdown and Code Chunks.
+
+## Step 4 : ANALYZE
+Now that the data is stored appropriately and has been prepared for analysis we can start putting it to work.
+<br>
+
+### Visualizing the relationships between some parameters hoping to find some patterns
+ggplot2 is an open-source data visualization package for the statistical programming language R. It is the most common package used for visualization
+
+#### Total Steps Vs Calories
+```{r visual1}
+ggplot(data = daily_activity, aes(x = TotalSteps, y = Calories, color = Id)) + geom_point()  + stat_smooth(method = lm)+ labs(title = 'The Relationship between Total Steps Taken and Calories burnt')
+```
+<br>
+We can see that there is a positive correalation between steps taken and calories burnt.
+
+#### Total minutes asleep Vs total time in bed
+```{r visual2}
+ggplot(data = daily_sleep, aes(x = TotalTimeInBed, y = TotalMinutesAsleep, color = Id)) + geom_point() + stat_smooth(method = lm)+ labs(title = 'The Relationship betweenTotal Minutes in Bed and Total Minutes Asleep ')
+```
+<br>
+We can see that the linear model has fit the data really well, which means that the product captures this really well.
+
+#### Creating a new column to visualize the Weekdays
+```{r column}
+  combined_data$weekday <- weekdays(combined_data$Date)
+  combined_data$weekday <- factor(combined_data$weekday , levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+ggplot(data = combined_data, aes(x = weekday, fill = weekday)) + geom_bar(stat = "count")
+```
+<br>
+We can see that on weekends the users activity level is relatively low and on mid week they are somewhat high
+
+#### Less Sedentary Minutes on Saturday/Sunday
+```{r visual4}
+ggplot(data=combined_data, aes(x=weekday, y=SedentaryMinutes, fill=weekday))+ 
+  geom_bar(stat="identity")+
+  labs(title="Less Sedentary Minutes on Saturday", y="Sedentary Minutes")
+```
+<br>
+It's clear from the plot that on weekends the sedentary minutes are low maybe because it's holiday and people go out with their family compared to on weekdays when they are at thier office and sitting on their desk.
+
+#### Total Minutes Asleep During the Week
+```{r visual5}
+ggplot(data=combined_data, aes(x=weekday, y=TotalMinutesAsleep, fill=weekday))+ 
+  geom_bar(stat="identity")+
+  labs(title="Total Minutes Asleep During the Week", y="Total Minutes Asleep")
+```
+<br>
+**From weekday's total asleep minutes, we can see that most sleep data is recorded during Tuesday to Thursday. This raises a question "how comprehensive are the data to form an accurate analysis?"**
+
+#### More Steps on Saturday
+```{r visual7}
+  
+  ggplot(data=combined_data, aes(x=weekday, y=TotalSteps, fill=weekday))+ 
+    geom_bar(stat="identity")+
+    labs(title="More Steps on Saturday", y="Total Steps")
+```
+<br>
+
+#### Creating a new column to store the total minutes
+
+```{r create}
+combined_data$totalminutes <- combined_data$VeryActiveMinutes + combined_data$FairlyActiveMinutes + combined_data$LightlyActiveMinutes + combined_data$SedentaryMinutes
+```
+
+#### How different activities affect the calories burnt
+
+```{r visual8}
+p1 = ggplot(data = combined_data)  + geom_point(mapping = aes(x = totalminutes, y = Calories), color = "black")+
+  labs(title = "TotalMinutes Vs Calories")
+
+p2 = ggplot(data = combined_data)  + geom_point(mapping = aes(x = TotalSteps, y = Calories), color = 'blue')+
+  labs(title = "TotalSteps Vs Calories")
+
+p3 = ggplot(data = combined_data)  + geom_point(mapping = aes(x = TotalDistance, y = Calories), color = "grey")+
+  labs(title = "TotalDistance Vs Calories")
+
+grid.arrange(p1, p2, p3, ncol=3, nrow=1)
+```
+<br>
+By quickly analyzing these 3 scenarios, we observe “TotalDistance” is more closely related to “Calories”, but let´s explore a little further.
+
+#### Comparing the activity levels with Total Steps taken
+```{r visual9}
+  active_minutes_vs_steps <- ggplot(data = combined_data) + 
+    geom_point(mapping=aes(x=TotalSteps, y=FairlyActiveMinutes), color = "maroon", alpha = 1/3) +
+    geom_smooth(method = loess,formula =y ~ x, mapping=aes(x=TotalSteps, y=FairlyActiveMinutes, color=FairlyActiveMinutes), color = "maroon", se = FALSE) +
+    
+    geom_point(mapping=aes(x=TotalSteps, y=VeryActiveMinutes), color = "forestgreen", alpha = 1/3) +
+    geom_smooth(method = loess,formula =y ~ x,mapping=aes(x=TotalSteps, y=VeryActiveMinutes, color=VeryActiveMinutes), color = "forestgreen", se = FALSE) +
+    
+    geom_point(mapping=aes(x=TotalSteps, y=LightlyActiveMinutes), color = "orange", alpha = 1/3) +
+    geom_smooth(method = loess,formula =y ~ x,mapping=aes(x=TotalSteps, y=LightlyActiveMinutes, color=LightlyActiveMinutes), color = "orange", se = FALSE) +
+    
+    geom_point(mapping=aes(x=TotalSteps, y=SedentaryMinutes), color = "steelblue", alpha = 1/3) +
+    geom_smooth(method = loess,formula =y ~ x,mapping=aes(x=TotalSteps, y=SedentaryMinutes, color=SedentaryMinutes), color = "steelblue", se = FALSE) +
+    
+    annotate("text", x=35000, y=150, label="Very Active", color="black", size=3)+
+    annotate("text", x=35000, y=50, label="Fairly Active", color="black", size=3)+
+    annotate("text", x=35000, y=1350, label="Sedentary", color="black", size=3)+
+    annotate("text", x=35000, y=380, label="Lightly  Active", color="black", size=3)+
+    labs(x = "Total Steps", y = "Active Minutes", title="Steps vs Active Minutes")
+  
+  active_minutes_vs_steps
+  
+```
+
+<br>
+**Comparing the four active levels to the total steps, we see most data is concentrated on users who take about 5000 to 15000 steps a day. These users spent an average between 8 to 13 hours in sedentary, 5 hours in lightly active, and 1 to 2 hour for fairly and very active.**
+
+#### Calories burnt with every step taken
+```{r visual11}
+ggplot(data = combined_data) + geom_point(mapping = aes(x = TotalSteps, y = Calories, color = TotalSteps)) +
+  scale_color_gradientn(colors = "rainbow"(6))+
+  geom_hline(yintercept = 2306 , color = "red", size =1)+
+  geom_vline(xintercept = 7638, color = "blue", size = 1) +
+  geom_text(aes(x = 10000, y = 2100, label = "Mean"), color = "black", size=5) + 
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.8, face = "bold")) +
+  labs(
+    x = 'Steps taken',
+    y = 'Calories burned',
+    title = 'Calories burned for every step taken')
+```
+<br>
+From the plot we can see that **We have a positive correlation between calories burnt and every step** taken.
+Noted a few outliers: **Zero steps with zero to minimal calories burned. 1 observation of > 35,000 steps with < 3,000 calories burned.** Deduced that outliers could be due to natural variation of data, change in user’s usage or errors in data collection (ie. miscalculations, data contamination or human error).
+
+
+#### Active Minutes
+
+
+```{r visual12}
+Data_Ind <- combined_data %>%
+  summarise(Sum_VAM = sum(VeryActiveMinutes/1148807*100), 
+            Sum_FAM = sum(FairlyActiveMinutes/1148807*100), 
+            Sum_LAM = sum(LightlyActiveMinutes/1148807*100), 
+            Sum_SEM = sum(SedentaryMinutes/1148807*100),
+            Sum_TOTAL=sum(VeryActiveMinutes+FairlyActiveMinutes+LightlyActiveMinutes+SedentaryMinutes)) %>% 
+  round(digits = 2)
+
+slices <- c(Data_Ind$Sum_VAM, Data_Ind$Sum_FAM, Data_Ind$Sum_LAM, Data_Ind$Sum_SEM)
+lbls <- c("Very Active Min", "Fairly Active Min", "Lightly Active Min", "Sedentary Min")
+pie(slices,
+    labels=paste(lbls, slices, sep=" ", "%"),
+    col = rainbow(6),
+    main="Pie Chart - % of Activity in Minutes")
+```
+<br>
+Percentage of active minutes in the four categories: very active, fairly active, lightly active and sedentary. From the pie chart, we can see that most users spent 81.3% of their daily activity in sedentary minutes and only 1.74% in very active minutes.
+<br>
+The American Heart Association and World Health Organization recommend at least 150 minutes of moderate-intensity activity or 75 minutes of vigorous activity, or a combination of both, each week. That means it needs an daily goal of 21.4 minutes of FairlyActiveMinutes or 10.7 minutes of VeryActiveMinutes.
+
+
+## Step 6 :ACT
+In the final step, we will be delivering our insights and providing recommendations based on our analysis. Here, we revisit our business questions and share with you our high-level business recommendations.
+
+### **1. What are some trends in smart device usage?**
+Majority of users (81.10%) are using the FitBit app to track sedentary activities and not using it for tracking their health habits. Users prefer to track their activities during weekdays as compared to weekends - perhaps because they spend more time outside on weekdays and stay in on weekends. Data also tell us that most users log in their calories, steps taken, etc, and fewer log their sleep data.
+
+### **2. How could these trends apply to Bellabeat customers?**
+Both companies develop products focused on providing women with their health, habit and fitness data and encouraging them to understand their current habits and make healthy decisions. These common trends surrounding health and fitness can very well be applied to Bellabeat customers. Bellabeat could easily market these type of costumers by telling them smart-devices could help them start their journey by measuring how much they’re moving and how these moments of activity would benefit them to live longer!
+
+### **3. How could these trends help influence Bellabeat marketing strategy?**
+It is well documented that moderate-to-vigorous physical activity is protective against chronic disease. Conversely, emerging evidence indicates the deleterious effects of prolonged sitting, so in a need to change both behaviors, self-monitoring of behavior is one of the most robust behavior-change techniques available. Bellabeat marketing team can encourage users by educating and equipping them with knowledge about fitness benefits, suggest different types of exercise (ie. simple 10 minutes exercise on weekday and a more intense exercise on weekends) and calories intake and burnt rate information on the Bellabeat app.On weekends, Bellabeat app can also prompt notification to encourage users to exercise. By marketing these devices to consumers, Bellabeat provides a unique opportunity for individuals to change their behavior, become more physically active and increase their life expectancy.
+
+
+
+
+
